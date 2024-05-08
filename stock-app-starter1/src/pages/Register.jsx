@@ -7,7 +7,6 @@ import Grid from "@mui/material/Grid"
 import Box from "@mui/material/Box"
 import Button from "@mui/material/Button"
 import { Link, useNavigate } from "react-router-dom"
-
 import TextField from "@mui/material/TextField"
 
 const Register = () => {

@@ -1,34 +1,57 @@
-import axios from "axios"
-import { toastErrorNotify, toastSuccessNotify } from "../helper/ToastNotify"
-import { fetchFail, fetchStart, loginSuccess } from "../features/authSlice"
-import { useDispatch } from "react-redux"
-import { useNavigate } from "react-router-dom"
- 
+// import axios from "axios";
+import { toastErrorNotify, toastSuccessNotify } from "../helper/ToastNotify";
+import {
+  fetchFail,
+  fetchStart,
+  loginSuccess,
+  logoutSuccess,
+} from "../features/authSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import useAxios from "./useAxios";
+
 
 const useApiRequest = () => {
-  const dispatch = useDispatch()
-  const navigate = useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  // const { token } = useSelector((state) => state.auth);
+  const { axiosToken, axiosPublic } = useAxios();
 
   const login = async (userData) => {
 
+    dispatch(fetchStart());
+    try {
+      const { data } = await axiosPublic.post("/auth/login", userData)
+      dispatch(loginSuccess(data));
+      toastSuccessNotify("Login işlemi başarılı");
+      navigate("/stock");
+    } catch (error) {
+      dispatch(fetchFail());
+      toastErrorNotify("Login başarısız oldu");
+      console.log(error);
+    }
+  };
+
+  const register = async (userInfo) => {
     dispatch(fetchStart())
     try {
-      const { data } = await axios.post(
-        `${process.env.REACT_APP_BASE_URL}/auth/login`,
-        userData
-      )
-      dispatch(loginSuccess(data))
-      toastSuccessNotify("Login işlemi başarılı")
+      const { data } = await axiosPublic.post("/users/", userInfo)
+      dispatch(registerSuccess(data))
       navigate("/stock")
     } catch (error) {
       dispatch(fetchFail())
-      toastErrorNotify("Login başarısız oldu")
-      console.log(error)
     }
   }
-
-  const register = async () => {}
-  const logout = async () => {}
+  const logout = async () => {
+    dispatch(fetchStart())
+    try {
+      
+      await axiosToken.get("/auth/logout")
+      dispatch(logoutSuccess())
+    } catch (error) {
+      dispatch(fetchFail())
+    }
+  }
 
   return { login, register, logout }
 }
